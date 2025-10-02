@@ -1,3 +1,4 @@
+const e = require("express");
 const app = require("./src/app");
 
 const PORT = 3055;
@@ -10,4 +11,5 @@ process.on("SIGINT", () => {
   server.close(() => {
     console.log("Exit server...");
   });
+  process.exit(0);
 });
