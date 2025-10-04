@@ -10,7 +10,11 @@ const keyTokenSchema = new Schema(
       ref: "Shop",
       required: true,
     },
-    publicKey: {
+    key_accessToken: {
+      type: String,
+      required: true,
+    },
+    key_refreshToken: {
       type: String,
       required: true,
     },
