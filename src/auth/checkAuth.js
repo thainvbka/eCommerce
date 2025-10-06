@@ -61,8 +61,13 @@ const permission = (permission) => {
   };
 };
 
-const asyncHandler = (fn) => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
+// Lớp ngoài cùng
+const asyncHandler = (fn) => {
+  // Lớp bên trong
+  return (req, res, next) => {
+    // Lõi xử lý
+    fn(req, res, next).catch(next);
+  };
 };
 
 module.exports = {

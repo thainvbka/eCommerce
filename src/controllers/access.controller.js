@@ -7,10 +7,10 @@ class AccessController {
   signUp = async (req, res, next) => {
     console.log(`[P]::signUp::`, req.body);
     const result = await accessService.signUp(req.body);
-    CREATED.send(res, {
+    new CREATED({
       message: "User created successfully",
       metadata: result,
-    });
+    }).send(res);
   };
 }
 

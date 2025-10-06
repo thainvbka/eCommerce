@@ -1,5 +1,6 @@
 "use strict";
-const { StatusCodes, ReasonPhrases } = require("../configs/httpStatusCode");
+const StatusCodes = require("../configs/statusCodes");
+const ReasonPhrases = require("../configs/reasonPhrases");
 
 class SuccessResponse {
   constructor({
@@ -9,12 +10,12 @@ class SuccessResponse {
     metadata = {},
   }) {
     this.message = !message ? reasonStatus : message;
-    this.statusCode = statusCode;
+    this.status = statusCode;
     this.metadata = metadata;
   }
 
-  static send(res, headers = {}) {
-    return res.status(this.statusCode).json(this);
+  send(res, headers = {}) {
+    return res.status(this.status).json(this);
   }
 }
 

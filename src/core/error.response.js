@@ -1,9 +1,11 @@
-const { StatusCodes, ReasonPhrases } = require("../configs/httpStatusCode");
+"use strict";
+const StatusCodes = require("../configs/statusCodes");
+const ReasonPhrases = require("../configs/reasonPhrases");
 
 class ErrorResponse extends Error {
-  constructor(message, statusCode) {
+  constructor(message, status) {
     super(message);
-    this.statusCode = statusCode;
+    this.status = status;
   }
 }
 

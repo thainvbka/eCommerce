@@ -1,4 +1,4 @@
-'use strict";';
+"use strict";
 
 const apiKeyModel = require("../models/apikey.model");
 
