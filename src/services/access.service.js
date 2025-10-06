@@ -6,6 +6,10 @@ const KeyTokenService = require("./keyToken.service");
 const createTokenPair = require("../auth/authUtils").createTokenPair;
 const crypto = require("crypto");
 const { getInfoData } = require("../utils");
+const {
+  ConflictRequestError,
+  BadRequestError,
+} = require("../core/error.response");
 
 const ROLES = {
   SHOP: "SHOP",
@@ -16,86 +20,80 @@ const ROLES = {
 
 class AccessService {
   static signUp = async ({ name, email, password }) => {
-    try {
-      const holderShop = await shopModel.findOne({ email }).lean();
-      if (holderShop) {
-        return {
-          code: "xxxx",
-          message: "Shop already registered",
-        };
-      }
+    // try {
+    const holderShop = await shopModel.findOne({ email }).lean();
+    if (holderShop) {
+      throw new ConflictRequestError("Error: Email already registered");
+    }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      const newShop = await shopModel.create({
-        name,
-        email,
-        password: hashedPassword,
-        roles: [ROLES.SHOP],
+    const newShop = await shopModel.create({
+      name,
+      email,
+      password: hashedPassword,
+      roles: [ROLES.SHOP],
+    });
+
+    if (newShop) {
+      //create private key and public key
+      // const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+      //   modulusLength: 4096,
+      //   publicKeyEncoding: {
+      //     type: "pkcs1",
+      //     format: "pem",
+      //   },
+      //   privateKeyEncoding: {
+      //     type: "pkcs1",
+      //     format: "pem",
+      //   },
+      // });
+
+      const key_accessToken = crypto.randomBytes(64).toString("hex");
+      const key_refreshToken = crypto.randomBytes(64).toString("hex");
+
+      const tokenStore = await KeyTokenService.createKeyToken({
+        userId: newShop._id,
+        key_accessToken,
+        key_refreshToken,
       });
 
-      if (newShop) {
-        //create private key and public key
-        // const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
-        //   modulusLength: 4096,
-        //   publicKeyEncoding: {
-        //     type: "pkcs1",
-        //     format: "pem",
-        //   },
-        //   privateKeyEncoding: {
-        //     type: "pkcs1",
-        //     format: "pem",
-        //   },
-        // });
-
-        const key_accessToken = crypto.randomBytes(64).toString("hex");
-        const key_refreshToken = crypto.randomBytes(64).toString("hex");
-
-        const tokenStore = await KeyTokenService.createKeyToken({
-          userId: newShop._id,
-          key_accessToken,
-          key_refreshToken,
-        });
-
-        if (!key_accessToken) {
-          return {
-            code: "xxxx",
-            message: "tokenStore error",
-          };
-        }
-
-        // const publicKeyObject = crypto.createPublicKey(publicKeyString);
-
-        //create token pair
-        const tokens = await createTokenPair(
-          { userId: newShop._id, email },
-          key_accessToken,
-          key_refreshToken
-        );
-
-        return {
-          code: 201,
-          metadata: {
-            shop: getInfoData({
-              fields: ["_id", "name", "email"],
-              object: newShop,
-            }),
-            tokens,
-          },
-        };
+      if (!tokenStore) {
+        throw new BadRequestError("Error: KeyToken not found");
       }
 
+      // const publicKeyObject = crypto.createPublicKey(publicKeyString);
+
+      //create token pair
+      const tokens = await createTokenPair(
+        { userId: newShop._id, email },
+        key_accessToken,
+        key_refreshToken
+      );
+
       return {
-        code: 200,
-        metadata: null,
-      };
-    } catch (error) {
-      return {
-        code: "xxx",
-        message: error.message,
-        status: error,
+        code: 201,
+        metadata: {
+          shop: getInfoData({
+            fields: ["_id", "name", "email"],
+            object: newShop,
+          }),
+          tokens,
+        },
       };
     }
+
+    return {
+      code: 200,
+      metadata: null,
+    };
+    // } catch (error) {
+    //   return {
+    //     code: "xxx",
+    //     message: error.message,
+    //     status: error,
+    //   };
+    // }
   };
 }
 
