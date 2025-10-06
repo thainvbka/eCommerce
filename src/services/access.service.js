@@ -72,7 +72,6 @@ class AccessService {
       );
 
       return {
-        code: 201,
         metadata: {
           shop: getInfoData({
             fields: ["_id", "name", "email"],
