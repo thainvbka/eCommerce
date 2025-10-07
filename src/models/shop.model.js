@@ -1,7 +1,5 @@
 const { model, Schema } = require("mongoose");
-
-const DOCUMENT_NAME = "Shop";
-const COLLECTION_NAME = "Shops";
+const { DOCUMENT_NAMES, COLLECTION_NAMES } = require("../constants");
 
 const shopSchema = new Schema(
   {
@@ -35,8 +33,8 @@ const shopSchema = new Schema(
   },
   {
     timestamps: true,
-    collection: COLLECTION_NAME,
+    collection: COLLECTION_NAMES.SHOP,
   }
 );
 
-module.exports = model(DOCUMENT_NAME, shopSchema);
+module.exports = model(DOCUMENT_NAMES.SHOP, shopSchema);

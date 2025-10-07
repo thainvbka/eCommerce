@@ -1,7 +1,5 @@
 const { model, Schema } = require("mongoose");
-
-const DOCUMENT_NAME = "Key";
-const COLLECTION_NAME = "Keys";
+const { DOCUMENT_NAMES, COLLECTION_NAMES } = require("../constants");
 
 const keyTokenSchema = new Schema(
   {
@@ -18,15 +16,21 @@ const keyTokenSchema = new Schema(
       type: String,
       required: true,
     },
-    refreshToken: {
+    refreshTokensUsed: {
+      // luu nhung refresh token da su dung
       type: Array,
       default: [],
+    },
+    refreshToken: {
+      // luu refresh token hien tai
+      type: String,
+      required: true,
     },
   },
   {
     timestamps: true,
-    collection: COLLECTION_NAME,
+    collection: COLLECTION_NAMES.KEY,
   }
 );
 
-module.exports = model(DOCUMENT_NAME, keyTokenSchema);
+module.exports = model(DOCUMENT_NAMES.KEY, keyTokenSchema);

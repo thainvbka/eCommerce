@@ -30,6 +30,7 @@ class OK extends SuccessResponse {
 
 class CREATED extends SuccessResponse {
   constructor({
+    options = {},
     message,
     statusCode = StatusCodes.CREATED,
     reasonStatus = ReasonPhrases.CREATED,
@@ -41,10 +42,12 @@ class CREATED extends SuccessResponse {
       reasonStatus,
       metadata,
     });
+    this.options = options;
   }
 }
 
 module.exports = {
   OK,
   CREATED,
+  SuccessResponse,
 };

@@ -1,9 +1,7 @@
 "use strict";
 
 const { model, Schema } = require("mongoose");
-
-const DOCUMENT_NAME = "Apikey";
-const COLLECTION_NAME = "Apikeys";
+const { DOCUMENT_NAMES, COLLECTION_NAMES } = require("../constants");
 
 const apiKeySchema = new Schema(
   {
@@ -24,8 +22,8 @@ const apiKeySchema = new Schema(
   },
   {
     timestamps: true,
-    collection: COLLECTION_NAME,
+    collection: COLLECTION_NAMES.API_KEY,
   }
 );
 
-module.exports = model(DOCUMENT_NAME, apiKeySchema);
+module.exports = model(DOCUMENT_NAMES.API_KEY, apiKeySchema);

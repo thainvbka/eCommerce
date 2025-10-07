@@ -4,19 +4,15 @@ const shopModel = require("../models/shop.model");
 const bcrypt = require("bcrypt");
 const KeyTokenService = require("./keyToken.service");
 const createTokenPair = require("../auth/authUtils").createTokenPair;
-const crypto = require("crypto");
 const { getInfoData } = require("../utils");
 const {
   ConflictRequestError,
   BadRequestError,
+  AuthFailureError,
 } = require("../core/error.response");
-
-const ROLES = {
-  SHOP: "SHOP",
-  WRITER: "WRITER",
-  EDITOR: "EDITOR",
-  ADMIN: "ADMIN",
-};
+const { ROLES } = require("../constants");
+const { findByEmail } = require("./shop.service");
+const { generateRandomBytes } = require("../utils");
 
 class AccessService {
   static signUp = async ({ name, email, password }) => {
@@ -49,8 +45,8 @@ class AccessService {
       //   },
       // });
 
-      const key_accessToken = crypto.randomBytes(64).toString("hex");
-      const key_refreshToken = crypto.randomBytes(64).toString("hex");
+      const key_accessToken = generateRandomBytes(64);
+      const key_refreshToken = generateRandomBytes(64);
 
       const tokenStore = await KeyTokenService.createKeyToken({
         userId: newShop._id,
@@ -88,6 +84,47 @@ class AccessService {
     //     status: error,
     //   };
     // }
+  };
+
+  static logIn = async ({ email, password, refreshToken = null }) => {
+    const foundShop = await findByEmail({ email });
+    if (!foundShop) {
+      throw new BadRequestError("Error: Email or Password incorrect");
+    }
+
+    const match = await bcrypt.compare(password, foundShop.password);
+    if (!match) {
+      throw new AuthFailureError("Error: Email or Password incorrect");
+    }
+
+    const key_accessToken = generateRandomBytes(64);
+    const key_refreshToken = generateRandomBytes(64);
+
+    const { _id: userId } = foundShop;
+    const tokens = await createTokenPair(
+      { userId, email },
+      key_accessToken,
+      key_refreshToken
+    );
+
+    const tokenStore = await KeyTokenService.createKeyToken({
+      userId,
+      key_accessToken,
+      key_refreshToken,
+      refreshToken: tokens.refreshToken,
+    });
+
+    if (!tokenStore) {
+      throw new BadRequestError("Error: KeyToken not found");
+    }
+
+    return {
+      shop: getInfoData({
+        fields: ["_id", "name", "email"],
+        object: foundShop,
+      }),
+      tokens,
+    };
   };
 }
 
