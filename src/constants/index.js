@@ -19,8 +19,15 @@ const ROLES = {
   ADMIN: "ADMIN",
 };
 
+const HEADER = {
+  API_KEY: "x-api-key",
+  AUTHORIZATION: "authorization",
+  CLIENT_ID: "x-client-id",
+};
+
 module.exports = {
   DOCUMENT_NAMES,
   COLLECTION_NAMES,
   ROLES,
+  HEADER,
 };

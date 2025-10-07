@@ -22,9 +22,15 @@ class AccessController {
     new SuccessResponse({
       message: "User logged in successfully",
       metadata: result,
-      options: {
-        limit: 10, //vi du them options
-      },
+    }).send(res);
+  };
+
+  logOut = async (req, res, next) => {
+    console.log(`[P]::logOut::`, req.keyStore);
+    const result = await accessService.logOut({ keyStore: req.keyStore });
+    new SuccessResponse({
+      message: "User logged out successfully",
+      metadata: result,
     }).send(res);
   };
 }
