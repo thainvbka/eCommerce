@@ -33,6 +33,17 @@ class AccessController {
       metadata: result,
     }).send(res);
   };
+
+  handlerRefreshToken = async (req, res, next) => {
+    console.log(`[P]::handlerRefreshToken::`, req.body);
+    const result = await accessService.handlerRefreshToken(
+      req.body.refreshToken
+    );
+    new SuccessResponse({
+      message: "Get new access token successfully",
+      metadata: result,
+    }).send(res);
+  };
 }
 
 module.exports = new AccessController();

@@ -9,12 +9,67 @@ const {
   ConflictRequestError,
   BadRequestError,
   AuthFailureError,
+  ForbiddenError,
 } = require("../core/error.response");
 const { ROLES } = require("../constants");
 const { findByEmail } = require("./shop.service");
 const { generateRandomBytes } = require("../utils");
+const { verifyJWT } = require("../auth/checkAuth");
 
 class AccessService {
+  static handlerRefreshToken = async (refreshToken) => {
+    //check refresh token in db
+    const foundToken = await KeyTokenService.findByRefreshTokenUsed(
+      refreshToken
+    );
+
+    if (foundToken) {
+      const userId = foundToken.user;
+      console.log(
+        `[S]::handlerRefreshToken::Token reuse detected for user: ${userId}`
+      );
+      //xoa token cu
+      await KeyTokenService.deleteKeyById(userId);
+      throw new ForbiddenError("Something went wrong! Please login again");
+    }
+
+    const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
+    if (!holderToken) throw new AuthFailureError("Shop not registered");
+
+    const { userId, email } = await verifyJWT(
+      refreshToken,
+      holderToken.key_refreshToken
+    );
+
+    //check userId
+    const foundShop = await findByEmail({ email });
+    if (!foundShop) throw new AuthFailureError("Shop not registered");
+
+    //create new tokens
+    const key_accessToken = generateRandomBytes(64);
+    const key_refreshToken = generateRandomBytes(64);
+
+    const tokens = await createTokenPair(
+      { userId, email },
+      key_accessToken,
+      key_refreshToken
+    );
+
+    //update token
+    await KeyTokenService.updateKeyToken({
+      id: holderToken._id,
+      newKeyAccess: key_accessToken,
+      newKeyRefresh: key_refreshToken,
+      newRefreshToken: tokens.refreshToken,
+      oldRefreshToken: refreshToken,
+    });
+
+    return {
+      user: { userId, email },
+      tokens,
+    };
+  };
+
   static signUp = async ({ name, email, password }) => {
     // try {
     const holderShop = await shopModel.findOne({ email }).lean();
