@@ -2,6 +2,7 @@
 
 const accessService = require("../services/access.service");
 const { CREATED, SuccessResponse } = require("../core/success.response");
+const { keys } = require("lodash");
 
 class AccessController {
   signUp = async (req, res, next) => {
@@ -36,9 +37,11 @@ class AccessController {
 
   handlerRefreshToken = async (req, res, next) => {
     console.log(`[P]::handlerRefreshToken::`, req.body);
-    const result = await accessService.handlerRefreshToken(
-      req.body.refreshToken
-    );
+    const result = await accessService.handlerRefreshToken({
+      refreshToken: req.refreshToken,
+      user: req.user,
+      keyStore: req.keyStore,
+    });
     new SuccessResponse({
       message: "Get new access token successfully",
       metadata: result,

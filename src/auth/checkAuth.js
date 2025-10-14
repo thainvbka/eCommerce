@@ -72,6 +72,25 @@ const authenticate = async (req, res, next) => {
   const keyStore = await keyTokenService.findByUserId(userId);
   if (!keyStore) throw new NotFoundError("Not found keyStore");
 
+  if (req.headers[HEADER.REFRESH_TOKEN]) {
+    try {
+      const refreshToken = req.headers[HEADER.REFRESH_TOKEN];
+      const decoded = await verifyJWT(refreshToken, keyStore.key_refreshToken);
+      if (!decoded) throw new AuthFailureError("Invalid request");
+
+      if (decoded.userId !== userId)
+        throw new AuthFailureError("Invalid request");
+
+      req.keyStore = keyStore;
+      req.user = decoded;
+      req.refreshToken = refreshToken;
+
+      return next();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   const accessToken = req.headers[HEADER.AUTHORIZATION];
   if (!accessToken) throw new AuthFailureError("Invalid request");
 

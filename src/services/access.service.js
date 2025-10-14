@@ -17,55 +17,44 @@ const { generateRandomBytes } = require("../utils");
 const { verifyJWT } = require("../auth/checkAuth");
 
 class AccessService {
-  static handlerRefreshToken = async (refreshToken) => {
-    //check refresh token in db
-    const foundToken = await KeyTokenService.findByRefreshTokenUsed(
-      refreshToken
-    );
+  static handlerRefreshToken = async ({ refreshToken, user, keyStore }) => {
+    const { userId, email } = user;
 
-    if (foundToken) {
-      const userId = foundToken.user;
-      console.log(
-        `[S]::handlerRefreshToken::Token reuse detected for user: ${userId}`
-      );
+    if (keyStore.refreshTokensUsed.includes(refreshToken)) {
+      console.log("Possible token reuse detected!");
       //xoa token cu
       await KeyTokenService.deleteKeyById(userId);
       throw new ForbiddenError("Something went wrong! Please login again");
     }
 
-    const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
-    if (!holderToken) throw new AuthFailureError("Shop not registered");
-
-    const { userId, email } = await verifyJWT(
-      refreshToken,
-      holderToken.key_refreshToken
-    );
+    if (keyStore.refreshToken !== refreshToken) {
+      console.log("Token mismatch detected!");
+      throw new AuthFailureError("Shop not registered");
+    }
 
     //check userId
     const foundShop = await findByEmail({ email });
     if (!foundShop) throw new AuthFailureError("Shop not registered");
 
     //create new tokens
-    const key_accessToken = generateRandomBytes(64);
-    const key_refreshToken = generateRandomBytes(64);
+    // const key_accessToken = generateRandomBytes(64);
+    // const key_refreshToken = generateRandomBytes(64);
 
     const tokens = await createTokenPair(
       { userId, email },
-      key_accessToken,
-      key_refreshToken
+      keyStore.key_accessToken,
+      keyStore.key_refreshToken
     );
 
     //update token
     await KeyTokenService.updateKeyToken({
-      id: holderToken._id,
-      newKeyAccess: key_accessToken,
-      newKeyRefresh: key_refreshToken,
+      id: keyStore._id,
       newRefreshToken: tokens.refreshToken,
       oldRefreshToken: refreshToken,
     });
 
     return {
-      user: { userId, email },
+      user,
       tokens,
     };
   };

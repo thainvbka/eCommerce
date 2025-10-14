@@ -34,18 +34,10 @@ class KeyTokenService {
     }
   };
 
-  static updateKeyToken = async ({
-    id,
-    newKeyAccess,
-    newKeyRefresh,
-    newRefreshToken,
-    oldRefreshToken,
-  }) => {
+  static updateKeyToken = async ({ id, newRefreshToken, oldRefreshToken }) => {
     return await keyTokenModel.findByIdAndUpdate(
       id,
       {
-        key_accessToken: newKeyAccess,
-        key_refreshToken: newKeyRefresh,
         $push: { refreshTokensUsed: oldRefreshToken },
         refreshToken: newRefreshToken,
       },
