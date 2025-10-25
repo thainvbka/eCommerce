@@ -1,19 +1,39 @@
 "use strict";
 
-const { product, clothing, electronic } = require("../models/product.model");
+const {
+  product,
+  clothing,
+  electronic,
+  furniture,
+} = require("../models/product.model");
 const { BadRequestError } = require("../core/error.response");
 
 class ProductFactory {
-  static async createProduct(type, payload) {
-    switch (type) {
-      case "clothing":
-        return new Clothing(payload).createProduct();
-      case "electronic":
-        return new Electronic(payload).createProduct();
-      default:
-        throw new BadRequestError("Invalid product type");
-    }
+  static productRegistry = {}; //key: type, value: class
+
+  static registerProductType(type, cls) {
+    ProductFactory.productRegistry[type] = cls;
   }
+
+  static async createProduct(type, payload) {
+    const ProductClass = ProductFactory.productRegistry[type];
+    if (!ProductClass) {
+      throw new BadRequestError("Invalid product type");
+    }
+    const productInstance = new ProductClass(payload);
+    return await productInstance.createProduct();
+  }
+
+  // static async createProduct(type, payload) {
+  //   switch (type) {
+  //     case "clothing":
+  //       return new Clothing(payload).createProduct();
+  //     case "electronic":
+  //       return new Electronic(payload).createProduct();
+  //     default:
+  //       throw new BadRequestError("Invalid product type");
+  //   }
+  // }
 }
 
 //define base product class
@@ -56,6 +76,19 @@ class Clothing extends Product {
   }
 }
 
+class Furniture extends Product {
+  async createProduct() {
+    const newFurniture = await furniture.create({
+      ...this.product_attributes,
+      product_shop: this.product_shop,
+    });
+    if (!newFurniture) throw new BadRequestError("Create new furniture error");
+    const newProduct = await super.createProduct(newFurniture._id);
+    if (!newProduct) throw new BadRequestError("Create new product error");
+    return newProduct;
+  }
+}
+
 class Electronic extends Product {
   async createProduct() {
     const newElectronic = await electronic.create({
@@ -69,5 +102,9 @@ class Electronic extends Product {
     return newProduct;
   }
 }
+
+ProductFactory.registerProductType("Clothing", Clothing);
+ProductFactory.registerProductType("Electronic", Electronic);
+ProductFactory.registerProductType("Furniture", Furniture);
 
 module.exports = ProductFactory;

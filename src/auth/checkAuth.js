@@ -102,6 +102,7 @@ const authenticate = async (req, res, next) => {
       throw new AuthFailureError("Invalid request");
 
     req.keyStore = keyStore;
+    req.user = decoded;
 
     return next();
   } catch (error) {
