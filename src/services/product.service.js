@@ -7,6 +7,13 @@ const {
   furniture,
 } = require("../models/product.model");
 const { BadRequestError } = require("../core/error.response");
+const {
+  findAllDraftsForShop,
+  publishProductByShop,
+  findAllPublishedForShop,
+  unPublishProductByShop,
+  searchProductsByUser,
+} = require("../models/repositories/product.repo");
 
 class ProductFactory {
   static productRegistry = {}; //key: type, value: class
@@ -34,6 +41,29 @@ class ProductFactory {
   //       throw new BadRequestError("Invalid product type");
   //   }
   // }
+  // query
+  static async findAllDraftsForShop({ product_shop, limit = 50, skip = 0 }) {
+    const query = { product_shop, isDraft: true };
+    return await findAllDraftsForShop({ query, limit, skip });
+  }
+
+  static async findAllPublishedForShop({ product_shop, limit = 50, skip = 0 }) {
+    const query = { product_shop, isPublished: true };
+    return await findAllPublishedForShop({ query, limit, skip });
+  }
+
+  static async searchProductsByUser({ keySearch, limit = 50, skip = 0 }) {
+    return await searchProductsByUser({ keySearch, limit, skip });
+  }
+
+  //put
+  static async publishProductByShop({ product_shop, product_id }) {
+    return await publishProductByShop({ product_shop, product_id });
+  }
+
+  static async unPublishProductByShop({ product_shop, product_id }) {
+    return await unPublishProductByShop({ product_shop, product_id });
+  }
 }
 
 //define base product class
