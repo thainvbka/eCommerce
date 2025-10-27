@@ -12,7 +12,17 @@ const generateRandomBytes = (size) => {
   return crypto.randomBytes(size).toString("hex");
 };
 
+const getSelectData = (select = []) => {
+  return Object.fromEntries(select.map((field) => [field, 1]));
+};
+
+const getUnselectData = (unselect = []) => {
+  return Object.fromEntries(unselect.map((field) => [field, 0]));
+};
+
 module.exports = {
   getInfoData,
   generateRandomBytes,
+  getSelectData,
+  getUnselectData,
 };
