@@ -15,6 +15,21 @@ class ProductController {
     }).send(res);
   };
 
+  updateProduct = async (req, res, next) => {
+    const result = await ProductFactory.updateProduct(
+      req.body.product_type,
+      req.params.product_id,
+      {
+        ...req.body,
+        product_shop: req.user.userId,
+      }
+    );
+    new SuccessResponse({
+      message: "Product updated successfully",
+      metadata: result,
+    }).send(res);
+  };
+
   getDraftsForShop = async (req, res, next) => {
     const result = await ProductFactory.findAllDraftsForShop({
       product_shop: req.user.userId,

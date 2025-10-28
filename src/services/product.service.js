@@ -15,8 +15,9 @@ const {
   searchProductsByUser,
   findAllProducts,
   findProductById,
+  findByIdAndUpdate,
 } = require("../models/repositories/product.repo");
-
+const { removeUndefinedObject, updateNestedObject } = require("../utils");
 class ProductFactory {
   static productRegistry = {}; //key: type, value: class
 
@@ -31,6 +32,15 @@ class ProductFactory {
     }
     const productInstance = new ProductClass(payload);
     return await productInstance.createProduct();
+  }
+
+  static async updateProduct(type, product_id, payload) {
+    const ProductClass = ProductFactory.productRegistry[type];
+    if (!ProductClass) {
+      throw new BadRequestError("Invalid product type");
+    }
+    const productInstance = new ProductClass(payload);
+    return await productInstance.updateProduct(product_id);
   }
 
   // static async createProduct(type, payload) {
@@ -112,6 +122,10 @@ class Product {
   async createProduct(product_id) {
     return await product.create({ ...this, _id: product_id });
   }
+
+  async updateProduct(product_id, payload) {
+    return await findByIdAndUpdate({ product_id, payload, model: product });
+  }
 }
 
 class Clothing extends Product {
@@ -124,6 +138,31 @@ class Clothing extends Product {
     const newProduct = await super.createProduct(newClothing._id);
     if (!newProduct) throw new BadRequestError("Create new product error");
     return newProduct;
+  }
+
+  async updateProduct(product_id) {
+    // 1. Tạo object chứa các thuộc tính riêng của Clothing
+    const objectParams = removeUndefinedObject(this);
+    const clothingPayload = removeUndefinedObject(
+      objectParams.product_attributes
+    );
+
+    // 2. Cập nhật collection `clothes` nếu có thay đổi
+    if (Object.keys(clothingPayload).length > 0) {
+      await findByIdAndUpdate({
+        product_id,
+        payload: clothingPayload, // Không cần flatten ở đây
+        model: clothing,
+      });
+    }
+
+    // 3. Tạo object chứa các thuộc tính chung của Product
+    // và flatten các thuộc tính của clothing vào product_attributes
+    const productPayload = updateNestedObject(objectParams);
+
+    // 4. Cập nhật collection `Products`
+    const updateProduct = await super.updateProduct(product_id, productPayload);
+    return updateProduct;
   }
 }
 

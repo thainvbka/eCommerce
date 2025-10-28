@@ -38,6 +38,19 @@ const findProductById = async ({ product_id, unselect }) => {
     .exec();
 };
 
+const findByIdAndUpdate = async ({
+  product_id,
+  payload,
+  model,
+  newTrue = true,
+}) => {
+  return await model.findByIdAndUpdate(
+    product_id,
+    { $set: payload }, // Bọc payload trong $set
+    { new: newTrue }
+  );
+};
+
 const searchProductsByUser = async ({ keySearch, limit, skip }) => {
   const regexSearch = new RegExp(keySearch);
   const results = await product
@@ -102,4 +115,5 @@ module.exports = {
   searchProductsByUser,
   findAllProducts,
   findProductById,
+  findByIdAndUpdate,
 };
