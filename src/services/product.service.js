@@ -17,6 +17,7 @@ const {
   findProductById,
   findByIdAndUpdate,
 } = require("../models/repositories/product.repo");
+const { insertInventory } = require("../models/repositories/inventory.repo");
 const { removeUndefinedObject, updateNestedObject } = require("../utils");
 class ProductFactory {
   static productRegistry = {}; //key: type, value: class
@@ -120,7 +121,17 @@ class Product {
   }
 
   async createProduct(product_id) {
-    return await product.create({ ...this, _id: product_id });
+    const newProduct = await product.create({ ...this, _id: product_id });
+
+    if (newProduct) {
+      await insertInventory({
+        inven_productId: newProduct._id,
+        inven_stock: this.product_quantity,
+        inven_shopId: this.product_shop,
+      });
+    }
+
+    return newProduct;
   }
 
   async updateProduct(product_id, payload) {

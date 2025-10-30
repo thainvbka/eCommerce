@@ -4,12 +4,14 @@ const DOCUMENT_NAMES = {
   SHOP: "Shop",
   API_KEY: "Apikey",
   KEY: "Key",
+  INVENTORY: "Inventory",
 };
 
 const COLLECTION_NAMES = {
   SHOP: "Shops",
   API_KEY: "Apikeys",
   KEY: "Keys",
+  INVENTORY: "Inventories",
 };
 
 const ROLES = {
