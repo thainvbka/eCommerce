@@ -2,9 +2,7 @@
 
 const { model, Schema } = require("mongoose"); // Erase if already required
 const slugify = require("slugify");
-
-const DOCUMENT_NAME = "Product";
-const COLLECTION_NAME = "Products";
+const { DOCUMENT_NAMES, COLLECTION_NAMES } = require("../constants");
 
 const productSchema = new Schema(
   {
@@ -33,7 +31,7 @@ const productSchema = new Schema(
     isPublished: { type: Boolean, default: false, index: true, select: false },
   },
   {
-    collection: COLLECTION_NAME,
+    collection: COLLECTION_NAMES.PRODUCT,
     timestamps: true,
   }
 );
@@ -88,7 +86,7 @@ const furnitureSchema = new Schema(
 );
 
 module.exports = {
-  product: model(DOCUMENT_NAME, productSchema),
+  product: model(DOCUMENT_NAMES.PRODUCT, productSchema),
   clothing: model("Clothing", clothingSchema),
   electronic: model("Electronic", electronicSchema),
   furniture: model("Furniture", furnitureSchema),

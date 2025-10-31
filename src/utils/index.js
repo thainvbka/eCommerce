@@ -2,6 +2,9 @@
 
 const _ = require("lodash");
 const crypto = require("crypto");
+const { Types } = require("mongoose");
+
+const convertToObjectId = (id) => new Types.ObjectId(id);
 
 // lay thong tin theo fields
 const getInfoData = ({ fields = [], object = {} }) => {
@@ -69,4 +72,5 @@ module.exports = {
   getUnselectData,
   removeUndefinedObject,
   updateNestedObject,
+  convertToObjectId,
 };

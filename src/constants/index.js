@@ -5,6 +5,8 @@ const DOCUMENT_NAMES = {
   API_KEY: "Apikey",
   KEY: "Key",
   INVENTORY: "Inventory",
+  DISCOUNT: "Discount",
+  PRODUCT: "Product",
 };
 
 const COLLECTION_NAMES = {
@@ -12,6 +14,8 @@ const COLLECTION_NAMES = {
   API_KEY: "Apikeys",
   KEY: "Keys",
   INVENTORY: "Inventories",
+  DISCOUNT: "Discounts",
+  PRODUCT: "Products",
 };
 
 const ROLES = {
