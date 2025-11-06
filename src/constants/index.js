@@ -7,6 +7,7 @@ const DOCUMENT_NAMES = {
   INVENTORY: "Inventory",
   DISCOUNT: "Discount",
   PRODUCT: "Product",
+  CART: "Cart",
 };
 
 const COLLECTION_NAMES = {
@@ -16,6 +17,7 @@ const COLLECTION_NAMES = {
   INVENTORY: "Inventories",
   DISCOUNT: "Discounts",
   PRODUCT: "Products",
+  CART: "Carts",
 };
 
 const ROLES = {
