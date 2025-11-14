@@ -6,7 +6,11 @@ const {
   electronic,
   furniture,
 } = require("../product.model");
-const { getSelectData, getUnselectData } = require("../../utils");
+const {
+  getSelectData,
+  getUnselectData,
+  convertToObjectId,
+} = require("../../utils");
 
 const findAllDraftsForShop = async ({ query, limit, skip }) => {
   return await queryProducts({ query, limit, skip });
@@ -107,6 +111,10 @@ const queryProducts = async ({ query, limit, skip }) => {
     .exec();
 };
 
+const getProductById = async (product_id) => {
+  return await product.findOne({ _id: convertToObjectId(product_id) }).lean();
+};
+
 module.exports = {
   findAllDraftsForShop,
   publishProductByShop,
@@ -116,4 +124,5 @@ module.exports = {
   findAllProducts,
   findProductById,
   findByIdAndUpdate,
+  getProductById,
 };
