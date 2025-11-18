@@ -1,6 +1,6 @@
 "use strict";
 
-const { inventory } = require("../inventory.model");
+const Inventory = require("../inventory.model");
 
 const insertInventory = async ({
   inven_productId,
@@ -8,7 +8,7 @@ const insertInventory = async ({
   inven_stock,
   inven_shopId,
 }) => {
-  return await inventory.create({
+  return await Inventory.create({
     inven_productId,
     inven_location,
     inven_stock,

@@ -214,7 +214,7 @@ class DiscountService {
     console.log({ amount });
     return {
       totalOrder,
-      amount,
+      discount: amount,
       totalPrice: totalOrder - amount,
     };
   }

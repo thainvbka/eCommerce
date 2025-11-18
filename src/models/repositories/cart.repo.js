@@ -1,4 +1,4 @@
-const { cart } = require("../models/cart.model");
+const { cart } = require("../cart.model");
 const { convertToObjectId } = require("../../utils");
 
 const createUserCart = async ({ userId, product }) => {

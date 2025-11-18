@@ -3,6 +3,7 @@ const { findCartById } = require("../models/repositories/cart.repo");
 const { BadRequestError, NotFoundError } = require("../core/error.response");
 const { checkProductByServer } = require("../models/repositories/product.repo");
 const { getDiscountAmount } = require("./discount.service");
+const { convertToObjectId } = require("../utils");
 
 class CheckoutService {
   /*
@@ -43,7 +44,7 @@ class CheckoutService {
 */
   static async checkoutReview({ cartId, userId, shop_order_ids }) {
     //check cart exist
-    const userCart = await findCartById(cartId);
+    const userCart = await findCartById(convertToObjectId(cartId));
     if (!userCart || userCart.cart_userId.toString() !== userId) {
       throw new NotFoundError("Cart not found");
     }
@@ -89,7 +90,7 @@ class CheckoutService {
         // gia su chi co mot discount
         // get amount discount
         const { totalPrice = 0, discount = 0 } = await getDiscountAmount({
-          codeId: shop_discounts[0].codeId,
+          discount_code: shop_discounts[0].codeId,
           userId,
           shopId,
           products: checkProductServer,
@@ -101,11 +102,10 @@ class CheckoutService {
         if (discount > 0) {
           itemCheckout.priceApplyDiscount = checkoutPrice - discount;
         }
-
-        //tong thanh toan cuoi cung
-        checkout_orders.totalCheckout += itemCheckout.priceApplyDiscount;
-        shop_orders_ids_new.push(itemCheckout);
       }
+      //tong thanh toan cuoi cung
+      checkout_orders.totalCheckout += itemCheckout.priceApplyDiscount;
+      shop_orders_ids_new.push(itemCheckout);
     }
 
     return {

@@ -1,11 +1,10 @@
 "use strict";
 
 const express = require("express");
-const checkoutController = require("../controllers/checkout.controller");
+const CheckoutController = require("../../controllers/checkout.controller");
 const router = express.Router();
-const { asyncHandler } = require("../auth/checkAuth");
-const { authenticationV2 } = require("../auth/authUtils");
+const { asyncHandler } = require("../../helpers/asyncHandler");
 
-router.post("/review", asyncHandler(checkoutController.checkoutReview));
+router.post("/review", asyncHandler(CheckoutController.checkoutReview));
 
 module.exports = router;
