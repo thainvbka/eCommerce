@@ -8,6 +8,7 @@ const DOCUMENT_NAMES = {
   DISCOUNT: "Discount",
   PRODUCT: "Product",
   CART: "Cart",
+  ORDER: "Order",
 };
 
 const COLLECTION_NAMES = {
@@ -18,6 +19,7 @@ const COLLECTION_NAMES = {
   DISCOUNT: "Discounts",
   PRODUCT: "Products",
   CART: "Carts",
+  ORDER: "Orders",
 };
 
 const ROLES = {

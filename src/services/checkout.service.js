@@ -4,6 +4,12 @@ const { BadRequestError, NotFoundError } = require("../core/error.response");
 const { checkProductByServer } = require("../models/repositories/product.repo");
 const { getDiscountAmount } = require("./discount.service");
 const { convertToObjectId } = require("../utils");
+const { acquireLock, releaseLock } = require("./redis.service");
+const {
+  reservationInventory,
+  releaseReservation,
+} = require("../models/repositories/inventory.repo");
+const orderModel = require("../models/order.model");
 
 class CheckoutService {
   /*
@@ -113,6 +119,101 @@ class CheckoutService {
       shop_orders_ids_new,
       checkout_orders,
     };
+  }
+
+  // order
+  static async orderByUser({
+    shop_order_ids,
+    cartId,
+    userId,
+    user_address = {},
+    user_payment = {},
+  }) {
+    const { shop_order_ids_new, checkout_orders } =
+      await CheckoutService.checkoutReview({
+        cartId,
+        userId,
+        shop_order_ids,
+      });
+
+    //check lại mot lan xem vuot tong kho hang khong
+    //get new array products to check inventory
+    const products = shop_order_ids_new.flatMap((order) => order.item_products);
+    console.log(`[1]::products::`, products);
+    const acquireProduct = [];
+    for (let i = 0; i < products.length; i++) {
+      const { quantity, productId } = products[i];
+      const keyLock = await acquireLock(productId, quantity, cartId);
+      console.log("keyLock::", keyLock);
+      if (keyLock) {
+        try {
+          const checkInventory = await reservationInventory({
+            productId,
+            quantity,
+            cartId,
+          });
+          // Nếu trừ kho thành công (có trả về document)
+          if (checkInventory) {
+            acquireProduct.push(productId);
+          } else {
+            // Nếu kho không đủ hàng, rollback các sản phẩm đã đặt trước đó
+            for (const id of acquireProduct) {
+              const p = products.find((p) => p.productId === id);
+              if (p) {
+                await releaseReservation({
+                  productId: p.productId,
+                  quantity: p.quantity,
+                  cartId,
+                });
+              }
+            }
+            throw new BadRequestError("Một số sản phẩm đã hết hàng");
+          }
+        } catch (error) {
+          // Rollback nếu có lỗi xảy ra
+          for (const id of acquireProduct) {
+            const p = products.find((p) => p.productId === id);
+            if (p) {
+              await releaseReservation({
+                productId: p.productId,
+                quantity: p.quantity,
+                cartId,
+              });
+            }
+          }
+          throw error;
+        } finally {
+          await releaseLock(keyLock);
+        }
+      } else {
+        // Nếu không lấy được lock, rollback và báo lỗi
+        for (const id of acquireProduct) {
+          const p = products.find((p) => p.productId === id);
+          if (p) {
+            await releaseReservation({
+              productId: p.productId,
+              quantity: p.quantity,
+              cartId,
+            });
+          }
+        }
+        throw new BadRequestError("Vui lòng quay lại giỏ hàng (Lock failed)");
+      }
+    }
+
+    const newOrder = await orderModel.create({
+      order_userId: userId,
+      order_checkout: checkout_orders,
+      order_shipping: user_address,
+      order_payment: user_payment,
+      order_products: shop_order_ids_new,
+    });
+
+    // truong hop: new insert thanh cong, thi remove product co trong cart
+    if (newOrder) {
+      // remove product in my cart
+    }
+    return newOrder;
   }
 }
 
