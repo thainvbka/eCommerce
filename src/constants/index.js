@@ -10,6 +10,7 @@ const DOCUMENT_NAMES = {
   CART: "Cart",
   ORDER: "Order",
   COMMENT: "Comment",
+  NOTIFICATION: "Notification",
 };
 
 const COLLECTION_NAMES = {
@@ -22,6 +23,7 @@ const COLLECTION_NAMES = {
   CART: "Carts",
   ORDER: "Orders",
   COMMENT: "Comments",
+  NOTIFICATION: "Notifications",
 };
 
 const ROLES = {
@@ -38,9 +40,17 @@ const HEADER = {
   REFRESH_TOKEN: "x-rtoken-id",
 };
 
+const NOTIFICATION_TYPES = {
+  ORDER_SUCCESS: "ORDER_001",
+  ORDER_FAILED: "ORDER_002",
+  PROMOTION_NEW: "PROMOTION_001",
+  SHOP_NEW_PRODUCT: "SHOP_001",
+};
+
 module.exports = {
   DOCUMENT_NAMES,
   COLLECTION_NAMES,
   ROLES,
   HEADER,
+  NOTIFICATION_TYPES,
 };

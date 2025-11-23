@@ -19,6 +19,8 @@ const {
 } = require("../models/repositories/product.repo");
 const { insertInventory } = require("../models/repositories/inventory.repo");
 const { removeUndefinedObject, updateNestedObject } = require("../utils");
+const { pushNotificationToSystem } = require("./notification.service");
+const { NOTIFICATION_TYPES } = require("../constants");
 class ProductFactory {
   static productRegistry = {}; //key: type, value: class
 
@@ -134,6 +136,21 @@ class Product {
         inven_stock: this.product_quantity,
         inven_shopId: this.product_shop,
       });
+
+      //push notification to system
+      //worker của RabbitMQ sẽ lo việc tìm followers và gửi notification
+      // receiverId: 1 Quy ước Broadcast, chưa có người nhận cụ thể
+      pushNotificationToSystem({
+        type: NOTIFICATION_TYPES.SHOP_NEW_PRODUCT,
+        senderId: this.product_shop,
+        receiverId: 1, //hien tai mac dinh la userId là number vi chua co user model
+        options: {
+          shopName: this.product_shop,
+          productName: this.product_name,
+        },
+      })
+        .then((rs) => console.log("Push notification success:", rs))
+        .catch((err) => console.error("Push notification error:", err));
     }
 
     return newProduct;
