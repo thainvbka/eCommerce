@@ -34,4 +34,29 @@ const testConnection = async () => {
   }
 };
 
-module.exports = { connectToRabbitMQ, testConnection };
+const consumerQueue = async (channel, queueName) => {
+  try {
+    await channel.assertQueue(queueName, { durable: true });
+    console.log(`Waiting for messages in ${queueName}. To exit press CTRL+C`);
+    channel.consume(
+      queueName,
+      (msg) => {
+        if (msg !== null) {
+          // Process the message
+          // 1. find user follow shop
+          // 2. push notification to user
+          // 3. yes, ok =>> success
+          // 4. error => setup DLX ( dead letter exchange )
+          console.log("Received:", msg.content.toString());
+          channel.ack(msg);
+        }
+      },
+      { noAck: false }
+    );
+  } catch (error) {
+    console.error("Error in consumerQueue:", error);
+    throw error;
+  }
+};
+
+module.exports = { connectToRabbitMQ, testConnection, consumerQueue };
