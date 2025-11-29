@@ -1,12 +1,31 @@
 "use strict";
-const messageQueueService = require("./src/services/consumerQueue.service");
+const {
+  consumerToQueue,
+  consumerToQueueFailed,
+  consumerToQueueNomar,
+} = require("./src/services/consumerQueue.service");
 
 const queueName = "test_queue";
 
-messageQueueService
-  .consumerToQueue(queueName)
+// consumerToQueue(queueName)
+//   .then(() => {
+//     console.log(`Message consumer started: ${queueName}`);
+//   })
+//   .catch((err) => {
+//     console.error(`Message Error: ${err.message}`);
+//   });
+
+consumerToQueueNomar()
   .then(() => {
-    console.log(`Message consumer started: ${queueName}`);
+    console.log(`Message consumerToQueueNomar started`);
+  })
+  .catch((err) => {
+    console.error(`Message Error: ${err.message}`);
+  });
+
+consumerToQueueFailed()
+  .then(() => {
+    console.log(`Message consumerToQueueFailed started`);
   })
   .catch((err) => {
     console.error(`Message Error: ${err.message}`);
