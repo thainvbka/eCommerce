@@ -1,0 +1,25 @@
+use shopDEV;
+
+CREATE TABLE orders (
+order_id INT, -- key hoa don
+order_date DATE NOT NULL, -- ngay tao hoa don
+total_amount DECIMAL(10,2), -- tien tra
+PRIMARY KEY (order_id, order_date)
+)
+
+PARTITION BY RANGE COLUMNS (order_date) (
+PARTITION p0 VALUES LESS THAN ('2022-01-01'),
+PARTITION p2023 VALUES LESS THAN ('2023-01-01'),
+PARTITION p2024 VALUES LESS THAN ('2024-01-01'),
+PARTITION pmax VALUES LESS THAN (MAXVALUE)
+)
+
+EXPLAIN SELECT \* FROM orders;
+
+INSERT INTO orders VALUES (1, '2021-10-10', 100.99);
+
+INSERT INTO orders VALUES (2, '2022-10-10', 100.99);
+
+INSERT INTO orders VALUES (3, '2023-10-10', 100.99);
+
+INSERT INTO orders VALUES (4, '2024-10-10', 100.99);
