@@ -1,7 +1,7 @@
 const app = require("./src/app");
 const {
   app: { port },
-} = require("./src/configs/config.mongo");
+} = require("./src/configs/mongo.config");
 const PORT = port || 3000;
 
 const server = app.listen(PORT, () => {
