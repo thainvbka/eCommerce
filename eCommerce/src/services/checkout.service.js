@@ -5,6 +5,7 @@ const { checkProductByServer } = require("../models/repositories/product.repo");
 const { getDiscountAmount } = require("./discount.service");
 const { convertToObjectId } = require("../utils");
 const { acquireLock, releaseLock } = require("./redis.service");
+const { deleteProductInCart } = require("../models/repositories/cart.repo");
 const {
   reservationInventory,
   releaseReservation,
@@ -143,7 +144,7 @@ class CheckoutService {
     const acquireProduct = [];
     for (let i = 0; i < products.length; i++) {
       const { quantity, productId } = products[i];
-      const keyLock = await acquireLock(productId, quantity, cartId);
+      const keyLock = await acquireLock(productId, cartId);
       console.log("keyLock::", keyLock);
       if (keyLock) {
         try {
@@ -212,6 +213,10 @@ class CheckoutService {
     // truong hop: new insert thanh cong, thi remove product co trong cart
     if (newOrder) {
       // remove product in my cart
+      for (let i = 0; i < products.length; i++) {
+        const { productId } = products[i];
+        await deleteProductInCart({ userId, productId });
+      }
     }
     return newOrder;
   }

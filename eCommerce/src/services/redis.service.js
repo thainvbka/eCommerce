@@ -15,7 +15,7 @@ redisClient.on("error", (err) => {
   }
 })();
 
-const acquireLock = async (productId, quantity, cartId) => {
+const acquireLock = async (productId, cartId) => {
   const key = `lock_v2025_${productId}`;
   const retryTime = 10;
   const expireTime = 3000; // 3 giây tạm lock
