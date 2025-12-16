@@ -1,19 +1,41 @@
 "use strict";
 const amqp = require("amqplib");
 
-const connectToRabbitMQ = async () => {
-  try {
-    const connection = await amqp.connect("amqp://guest:guest@localhost:5672");
-    if (!connection) {
-      throw new Error("Failed to connect to RabbitMQ");
+class RabbitMQConnection {
+  constructor() {
+    this.connection = null;
+    this.channel = null;
+  }
+
+  async connect() {
+    if (this.connection) {
+      return { connection: this.connection, channel: this.channel };
     }
-    const channel = await connection.createChannel();
-    if (!channel) {
-      throw new Error("Failed to create channel");
+
+    try {
+      this.connection = await amqp.connect("amqp://guest:guest@localhost:5672");
+      this.channel = await this.connection.createChannel();
+
+      console.log("RabbitMQ connected (Producer)");
+
+      this.connection.on("close", () => {
+        console.log("RabbitMQ connection closed.");
+        this.connection = null;
+        this.channel = null;
+        setTimeout(() => this.connect(), 5000);
+      });
+
+      this.connection.on("error", (err) => {
+        console.error("RabbitMQ connection error:", err);
+      });
+
+      return { connection: this.connection, channel: this.channel };
+    } catch (error) {
+      console.error("Failed to connect to RabbitMQ:", error);
+      throw error;
     }
-    return { connection, channel };
-  } catch (error) {}
-};
+  }
+}
 
 const testConnection = async () => {
   try {

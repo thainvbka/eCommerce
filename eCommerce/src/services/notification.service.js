@@ -1,6 +1,7 @@
 "use strict";
 const notification = require("../models/notification.model");
-const { NOTIFICATION_TYPES } = require("../constants");
+const { NOTIFICATION_TYPES, QUEUE_NAMES } = require("../constants");
+const { sendToQueue } = require("./messageQueue.service");
 
 async function pushNotificationToSystem({
   type = NOTIFICATION_TYPES.SHOP_NEW_PRODUCT,
@@ -26,15 +27,33 @@ async function pushNotificationToSystem({
       content = "You have a new notification.";
   }
 
-  const newNotification = await notification.create({
+  const payload = {
     noti_type: type,
     noti_content: content,
     noti_senderId: senderId,
     noti_receiverId: receiverId,
     noti_options: options,
+    createdAt: new Date(),
+  };
+
+  await sendToQueue({
+    queueName: QUEUE_NAMES.NOTIFICATION,
+    message: payload,
   });
 
-  return newNotification;
+  // const newNotification = await notification.create({
+  //   noti_type: type,
+  //   noti_content: content,
+  //   noti_senderId: senderId,
+  //   noti_receiverId: receiverId,
+  //   noti_options: options,
+  // });
+
+  return {
+    success: true,
+    message: "Notification queued for delivery",
+    payload: payload,
+  };
 }
 
 async function listNotificationsByUser({

@@ -19,6 +19,16 @@ app.use(express.urlencoded({ extended: true }));
 const db = require("./db/init.mongodb");
 // checkOverload(); //kiểm tra quá tải kết nối
 
+//init rabbitmq
+const { connectToRabbitMQ } = require("./db/init.rabbit");
+connectToRabbitMQ()
+  .then(() => {
+    console.log("RabbitMQ connected (Consumer)");
+  })
+  .catch((err) => {
+    console.error("RabbitMQ connection error (Consumer):", err);
+  });
+
 //import routes
 app.use("", require("./routes"));
 

@@ -5,7 +5,10 @@ const {
   consumerToQueueNomar,
 } = require("./src/services/consumerQueue.service");
 
-const queueName = "test_queue";
+//init db
+const db = require("./src/db/init.mongodb");
+
+// const queueName = "test_queue";
 
 // consumerToQueue(queueName)
 //   .then(() => {

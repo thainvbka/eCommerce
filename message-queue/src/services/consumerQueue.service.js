@@ -1,8 +1,11 @@
 "use strict";
 
 const { consumerQueue, connectToRabbitMQ } = require("../db/init.rabbit");
+const { QUEUE_NAMES } = require("../constants");
+const notification = require("../models/notification.model");
 
 const messageQueueService = {
+  //nhan message tu queue
   consumerToQueue: async (queueName) => {
     try {
       const { channel, connection } = await connectToRabbitMQ();
@@ -13,11 +16,19 @@ const messageQueueService = {
     }
   },
 
-  //case processing
+  //consumer notification queue
+  //case processing: nhan message binh thuong
   consumerToQueueNomar: async (queueName) => {
     try {
       const { channel, connection } = await connectToRabbitMQ();
-      const notiQueue = "notificationQueueProcess";
+      const notiQueue = QUEUE_NAMES.NOTIFICATION;
+
+      await channel.assertQueue(notiQueue, {
+        durable: true,
+        deadLetterExchange: "notificationExDLX",
+        deadLetterRoutingKey: "notificationRoutingKeyDLX",
+      });
+      channel.prefetch(1); // Chi lay 1 message moi lan
 
       //1. xử lí lỗi TTL cho message
       // setTimeout(async () => {
@@ -33,19 +44,14 @@ const messageQueueService = {
       //   });
       // }, 15000);
 
-      //2. xử lí lỗi logic
-      channel.consume(notiQueue, (msg) => {
+      // xử lí lỗi logic
+      channel.consume(notiQueue, async (msg) => {
         try {
-          const number = Math.random();
-          console.log("Random number:", number);
-          if (number > 0.8) {
-            // Ném lỗi để mô phỏng xử lý thất bại
-            throw new Error("Sent notification failed HOT FIX");
-          }
-          console.log(
-            "sent notification successfully :",
-            msg.content.toString()
-          );
+          const data = JSON.parse(msg.content.toString());
+
+          await notification.create(data);
+          console.log("Notification saved:", data);
+
           channel.ack(msg);
         } catch (error) {
           console.error("Send notification error:", error);
@@ -62,7 +68,7 @@ const messageQueueService = {
       throw error;
     }
   },
-  //case faild processing (setup DLX)
+  //case faild processing (setup DLX) : nhan message bi loi
   consumerToQueueFailed: async (queueName) => {
     try {
       const { channel, connection } = await connectToRabbitMQ();
@@ -76,7 +82,8 @@ const messageQueueService = {
       });
       //2. create queue to handle message from DLX
       const queueResult = await channel.assertQueue(notiQueueHandle, {
-        exclusive: false,
+        // exclusive: false, //cho phep nhieu consumer cung truy cap
+        durable: true,
       });
       //3. bind queue to exchange DLX
       await channel.bindQueue(

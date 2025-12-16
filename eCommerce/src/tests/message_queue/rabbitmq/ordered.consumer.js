@@ -10,6 +10,7 @@ async function consumerOrderedMessage() {
     durable: true,
   });
 
+  //prefetch la mot thuoc tinh cua channel de gioi han so luong message ma consumer co the nhan va xu ly cung luc
   channel.prefetch(1); //đảm bảo mỗi consumer chỉ nhận một message tại một thời điểm => giữ thứ tự xử lý mặc dù xử lý không đồng bộ
 
   channel.consume(queueName, (msg) => {
