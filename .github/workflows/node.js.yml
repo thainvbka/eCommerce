@@ -25,4 +25,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        # fix lỗi "Dependencies lock file is not found"
+        cache-dependency-path: eCommerce/package-lock.json
     - run: npm ci
+    # để lệnh npm chạy đúng trong thư mục code
+      working-directory: ./eCommerce
