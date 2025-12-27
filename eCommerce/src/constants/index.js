@@ -11,6 +11,9 @@ const DOCUMENT_NAMES = {
   ORDER: "Order",
   COMMENT: "Comment",
   NOTIFICATION: "Notification",
+  USER: "User",
+  RESOURCE: "Resource",
+  ROLE: "Role",
 };
 
 const COLLECTION_NAMES = {
@@ -24,6 +27,9 @@ const COLLECTION_NAMES = {
   ORDER: "Orders",
   COMMENT: "Comments",
   NOTIFICATION: "Notifications",
+  USER: "Users",
+  RESOURCE: "Resources",
+  ROLE: "Roles",
 };
 
 const ROLES = {
