@@ -13,11 +13,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Setup Docker Buildx
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # 3. Deploy bằng Docker Compose
+      # 2. Deploy bằng Docker Compose
       - name: Build and Deploy
         run: |
           # Kiểm tra xem file .env có tồn tại chưa (để tránh crash)
