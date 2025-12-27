@@ -1,0 +1,63 @@
+services:
+  #mongo db service
+  mongo:
+    image: mongo:8.2.0
+    container_name: my-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  #redis service
+  redis:
+    image: redis:apline
+    container_name: my-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  #rabbitMQ service
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: my-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    evironment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  #eCommerce backend service
+  eCommerce:
+    build:
+      context: ./eCommerce
+      dockerfile: Dockerfile
+    container_name: eCommerce-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    env_file:
+      - .env
+
+  #message-queue service
+  message-queue:
+    build:
+      context: ./message-queue
+      dockerfile: Dockerfile
+    container_name: message-queue
+    restart: always
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    env_file:
+      - .env
+
+volumes:
+  mongo-data:

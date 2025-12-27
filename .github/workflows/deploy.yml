@@ -1,0 +1,37 @@
+name: Deploy Microservices to EC2
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      # 1. Lấy code mới nhất về
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Setup Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Deploy bằng Docker Compose
+      - name: Build and Deploy
+        run: |
+          # Kiểm tra xem file .env có tồn tại chưa (để tránh crash)
+          if [ ! -f .env ]; then
+            echo "WARNING: File .env không tồn tại. Hãy tạo thủ công trên server!"
+          fi
+
+          echo "Đang build và khởi động lại services..."
+
+          # Lệnh này sẽ:
+          # - Build lại image từ code mới (--build)
+          # - Chạy ngầm (-d)
+          # - Xóa các container mồ côi nếu có (--remove-orphans)
+          docker compose up -d --build --remove-orphans
+
+          # Xóa các image cũ không dùng đến để giải phóng ổ cứng EC2
+          docker image prune -f
